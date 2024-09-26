@@ -2,10 +2,9 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import {
   Strategy as JwtStrategy,
   ExtractJwt,
-  JwtFromRequestFunction,
   StrategyOptions,
 } from 'passport-jwt';
-import passport, { DoneCallback } from 'passport';
+import passport from 'passport';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 

@@ -13,7 +13,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
 
             next();
         }else{
-            throw new Error('Access not granted')
+            return res.sendStatus(403);
         }
     }catch(e){
         return next(e);
