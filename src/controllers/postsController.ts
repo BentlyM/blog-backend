@@ -1,26 +1,131 @@
-import { NextFunction, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { NextFunction, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
-// const posts = (req: Request, res: Response, next: NextFunction) => {
-//     const jwtSecret = process.env.JWT_SECRET as string;
-//     const token = req.body.token as string;
+export const posts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const posts = await prisma.post.findMany();
 
-//     jwt.verify(token, jwtSecret, (err: any, data: any)=>{
-//         if(err){
-//             res.sendStatus(403);
-//         }else{
-//             res.json({
-//                 msg: 'this route is protected...',
-//                 data
-//             })
-//         }
-//     });
-// }
+  res.json(posts);
+};
 
-export const posts = async (req: Request, res: Response, next: NextFunction) => {
-    const posts = await prisma.post.findMany();
+export const getUniquePost = async (req: Request, res: Response) => {
+  const postId: number = parseInt(req.params.id);
 
-    res.json({posts});
+  if (typeof postId !== 'undefined') {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    return res.json(post);
+  }
+
+  res.sendStatus(304);
+};
+
+export const postPosts = (req: Request, res: Response) => {
+  const jwtSecret = process.env.JWT_SECRET as string;
+  const token = req.body.token as string;
+  const { title, content } : {title: string, content: string} = req.body;
+
+  jwt.verify(token, jwtSecret, async (err: any, data: any) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(403).json({ msg: 'Invalid token' });
+    }
+
+    if (data.role !== 'ADMIN') {
+      return res.status(403).json({ msg: 'Forbidden' });
+    }
+
+    const post = await prisma.post.create({
+      data: {
+        title,
+        content,
+        author: {
+          connect: {
+            id: parseInt(data.id),
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({msg: 'created', post: post});
+  });
+};
+
+export const updateUniquePost = async (req:Request, res: Response) => {
+  const postId = parseInt(req.params.id);
+  const title : string | undefined = req.body.title;
+  const msg : string | undefined = req.body.content;
+  const published : boolean = req.body.published;
+
+  const updateData: { title?: string; content?: string; published? : boolean } = {
+    ...(title && { title }), // Conditionally include title
+    ...(msg && { content: msg }), // Conditionally include content
+    published: published ? true : false
+  };
+
+  try {
+
+  const jwtSecret = process.env.JWT_SECRET as string;
+  const token = req.body.token as string;
+
+  jwt.verify(token, jwtSecret, async (err: any, data: any) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(403).json({ msg: 'Invalid token' });
+    }
+
+    const uniquePost = await prisma.post.update({
+      where: {
+        id: postId,
+        authorId: data.id
+      },
+      data: updateData
+    });
+
+    return res.status(200).json({msg: 'updated', post: uniquePost});
+    });
+  }catch(err){
+    return res.status(500).json({err: 'Failed to update post'});
+  }
+}
+
+export const deleteUniquePost = async (req:Request,res:Response) => {
+  const postId = parseInt(req.params.id);
+
+
+  try{
+    const jwtSecret = process.env.JWT_SECRET as string;
+    const token = req.body.token as string;
+
+  jwt.verify(token, jwtSecret, async (err: any, data: any) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(403).json({ msg: 'Invalid token' });
+    }
+
+    const deletedPost = await prisma.post.delete({
+      where: {
+        id: postId,
+        authorId: data.id
+      }
+    })
+
+    return res.status(200).json({msg: 'deleted', post: deletedPost});
+  })
+  }catch(e){
+    return res.status(500).json({err: 'Failed to delete post'})
+  }
 }
