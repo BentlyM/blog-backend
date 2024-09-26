@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
@@ -117,17 +117,26 @@ export const deleteUniquePost = async (req:Request,res:Response) => {
 
       return res.status(403).json({ msg: 'Invalid token' });
     }
+    
+    if (data.role !== 'ADMIN') {
+      return res.status(403).json({ msg: 'Forbidden' });
+    }
 
-    const deletedPost = await prisma.post.delete({
-      where: {
-        id: postId,
-        authorId: data.id
-      }
-    })
+    try{
+      const deletedPost = await prisma.post.delete({
+        where: {
+          id: postId,
+          authorId: data.id
+        }
+      })
+    
+      return res.status(200).json({msg: 'deleted', post: deletedPost});
+    }catch(e){
+        return res.status(404).json({err: `Post with id ${postId} does not exist`})  
+    }
 
-    return res.status(200).json({msg: 'deleted', post: deletedPost});
   })
-  }catch(e){
-    return res.status(500).json({err: 'Failed to delete post'})
+  }catch(e: any){
+      return res.status(500).json({err: 'Failed to delete post', e})
   }
 }
