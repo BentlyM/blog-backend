@@ -3,7 +3,7 @@ import session from 'express-session';
 import passport from 'passport';
 import {default as registerRouter} from './routes/register';
 import {default as loginRouter} from './routes/login';
-import {default as protectedRouter} from './routes/protected';
+import {default as protectedRouter} from './routes/posts';
 import loggerMiddleware from './middleware/logger';
 
 
