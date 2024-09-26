@@ -24,7 +24,7 @@ export const getUniquePost = async (req: Request, res: Response) => {
       },
     });
 
-    return res.json(post);
+    return res.json(post ? post : {msg: 'Post Not Found'});
   }
 
   res.sendStatus(304);
@@ -45,6 +45,8 @@ export const postPosts = (req: Request, res: Response) => {
     if (data.role !== 'ADMIN') {
       return res.status(403).json({ msg: 'Forbidden' });
     }
+
+    if(!title || !content) return res.status(200).json({msg: 'missing credentials'});
 
     const post = await prisma.post.create({
       data: {
