@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import passport from 'passport';
+import '../configs/passportConfig';
 import jwt from 'jsonwebtoken'
 
 export const login = (req: Request, res: Response, next: NextFunction) => {
@@ -9,9 +10,8 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
     (err: any, user: any, info: any) => {
       if (err || !user) {
         return res.status(400).json({
-            msg: `something went wrong: ${err}`,
+            msg: `something went wrong: ${err ? err : `${info.message}`}`,
             user: user,
-            info: `${info.message}`
         })
       }
       req.logIn(user, { session: false }, (err)=>{

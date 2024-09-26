@@ -3,6 +3,7 @@ import session from 'express-session';
 import passport from 'passport';
 import {default as registerRouter} from './routes/register';
 import {default as loginRouter} from './routes/login';
+import {default as protectedRouter} from './routes/protected';
 import loggerMiddleware from './middleware/logger';
 
 
@@ -25,7 +26,7 @@ app.use(loggerMiddleware);
 
 app.use('/', registerRouter);
 app.use('/', loginRouter);
-
+app.use('/', protectedRouter);
 
 app.listen(PORT, hostname, ()=>{
     console.log(`listening on server http://${hostname}:${PORT}`);
