@@ -4,7 +4,7 @@ This API allows users to manage blog posts, comments, and user authentication. I
 
 ## Base URL
 ```
-http://localhost:3000/api
+https://backend-uoiu.onrender.com/api/posts
 ```
 
 ## Authentication
