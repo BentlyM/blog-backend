@@ -10,7 +10,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
     (err: any, user: any, info: any) => {
       if (err || !user) {
         return res.status(400).json({
-          msg: `something went wrong: ${err ? err : `${info.message}`}`,
+          err: `${err ? err : `${info.message}`}`,
           user: user,
         });
       }
