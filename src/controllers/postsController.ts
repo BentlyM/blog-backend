@@ -22,6 +22,9 @@ export const getUniquePost = async (req: Request, res: Response) => {
       where: {
         id: postId,
       },
+      include: {
+        comments: true,
+      }
     });
 
     return res.json(post ? post : {msg: 'Post Not Found'});
