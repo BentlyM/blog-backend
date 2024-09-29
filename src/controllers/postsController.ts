@@ -17,6 +17,8 @@ export const posts = async (
 export const getUniquePost = async (req: Request, res: Response) => {
   const postId: number = parseInt(req.params.id);
 
+  if(Number.isNaN(postId)) return res.sendStatus(400);
+
   if (typeof postId !== 'undefined') {
     const post = await prisma.post.findUnique({
       where: {
@@ -73,6 +75,8 @@ export const updateUniquePost = async (req:Request, res: Response) => {
   const msg : string | undefined = req.body.content;
   const published : boolean = req.body.published;
 
+  if(Number.isNaN(postId)) return res.sendStatus(400);
+
   const updateData: { title?: string; content?: string; published? : boolean } = {
     ...(title && { title }), // Conditionally include title
     ...(msg && { content: msg }), // Conditionally include content
@@ -109,6 +113,7 @@ export const updateUniquePost = async (req:Request, res: Response) => {
 export const deleteUniquePost = async (req:Request,res:Response) => {
   const postId = parseInt(req.params.id);
 
+  if(Number.isNaN(postId)) return res.sendStatus(400);
 
   try{
     const jwtSecret = process.env.JWT_SECRET as string;
