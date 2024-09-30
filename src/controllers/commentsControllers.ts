@@ -70,7 +70,7 @@ export const getComments = async (req: Request, res: Response) => {
 
     if (comments.length == 0) return res.json({ msg: ['no comments'] });
 
-    return res.status(200).json({ msg: 'Comments Found', info: comments });
+    return res.status(200).json({ msg: 'Comments Found', comments: comments });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal server error' });
