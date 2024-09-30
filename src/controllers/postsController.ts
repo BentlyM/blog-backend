@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
@@ -9,7 +9,16 @@ export const posts = async (
   res: Response,
   next: NextFunction
 ) => {
-  const posts = await prisma.post.findMany();
+  const posts = await prisma.post.findMany({
+    include: {
+      author: {
+        select: {
+          username: true,
+        }
+      },
+      comments: true,
+    }
+  });
 
   res.json(posts);
 };

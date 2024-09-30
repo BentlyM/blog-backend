@@ -58,6 +58,13 @@ export const getComments = async (req: Request, res: Response) => {
       where: {
         postId: postId,
       },
+      include: {
+        user: {
+          select: {
+            username: true,
+          }
+        }
+      }
     });
 
     if (comments.length == 0) return res.json({ msg: ['no comments'] });
