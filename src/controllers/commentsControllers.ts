@@ -59,6 +59,7 @@ export const getComments = async (req: Request, res: Response) => {
         postId: postId,
       },
       include: {
+        post: true,
         user: {
           select: {
             username: true,
