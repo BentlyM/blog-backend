@@ -1,7 +1,7 @@
 import {Router } from "express";
 import { verifyToken } from "../middleware/verifyToken";
 import { addComment, deleteComment, getComments } from "../controllers/commentsControllers";
-import { blogSanitization, commentSanitization } from "../misc/validation";
+import { commentSanitization } from "../misc/validation";
 
 const router = Router();
 
