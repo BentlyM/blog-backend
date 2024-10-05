@@ -36,7 +36,14 @@ export const getUniquePost = async (req: Request, res: Response) => {
       include: {
         comments: {
           select: {
-            user: true,
+            user: {
+              select: {
+                id: false,
+                username: true,
+                password: false,
+                role: false,
+              }
+            },
             content: true,
             createdAt: true,
           },
