@@ -34,6 +34,11 @@ export const getUniquePost = async (req: Request, res: Response) => {
         id: postId,
       },
       include: {
+        author: {
+          select: {
+            username: true,
+          },
+        },
         comments: {
           select: {
             user: {
@@ -42,7 +47,7 @@ export const getUniquePost = async (req: Request, res: Response) => {
                 username: true,
                 password: false,
                 role: false,
-              }
+              },
             },
             content: true,
             createdAt: true,
