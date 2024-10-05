@@ -59,13 +59,12 @@ export const getComments = async (req: Request, res: Response) => {
         postId: postId,
       },
       include: {
-        post: true,
         user: {
           select: {
             username: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (comments.length == 0) return res.json({ msg: ['no comments'] });
@@ -78,12 +77,11 @@ export const getComments = async (req: Request, res: Response) => {
 };
 
 export const deleteComment = async (req: Request, res: Response) => {
-    const commentId: number = parseInt(req.params.id);
-    const jwtSecret = process.env.JWT_SECRET as string;
-    const token = req.body.token as string;
+  const commentId: number = parseInt(req.params.id);
+  const jwtSecret = process.env.JWT_SECRET as string;
+  const token = req.body.token as string;
 
   try {
-
     jwt.verify(token, jwtSecret, async (err: any, data: any) => {
       if (err) {
         return res.status(401).json({ message: 'Token is not valid' });
@@ -95,8 +93,8 @@ export const deleteComment = async (req: Request, res: Response) => {
 
       const deletedComment = await prisma.comment.findUnique({
         where: {
-            id: commentId
-        }
+          id: commentId,
+        },
       });
 
       return res
@@ -107,4 +105,4 @@ export const deleteComment = async (req: Request, res: Response) => {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
