@@ -14,10 +14,10 @@ export const posts = async (
       author: {
         select: {
           username: true,
-        }
+        },
       },
       comments: true,
-    }
+    },
   });
 
   res.json(posts);
@@ -26,7 +26,7 @@ export const posts = async (
 export const getUniquePost = async (req: Request, res: Response) => {
   const postId: number = parseInt(req.params.id);
 
-  if(Number.isNaN(postId)) return res.sendStatus(400);
+  if (Number.isNaN(postId)) return res.sendStatus(400);
 
   if (typeof postId !== 'undefined') {
     const post = await prisma.post.findUnique({
@@ -34,11 +34,17 @@ export const getUniquePost = async (req: Request, res: Response) => {
         id: postId,
       },
       include: {
-        comments: true,
-      }
+        comments: {
+          select: {
+            user: true,
+            content: true,
+            createdAt: true,
+          },
+        },
+      },
     });
 
-    return res.json(post ? post : {msg: 'Post Not Found'});
+    return res.json(post ? post : { msg: 'Post Not Found' });
   }
 
   res.sendStatus(304);
@@ -47,7 +53,7 @@ export const getUniquePost = async (req: Request, res: Response) => {
 export const postPosts = (req: Request, res: Response) => {
   const jwtSecret = process.env.JWT_SECRET as string;
   const token = req.body.token as string;
-  const { title, content } : {title: string, content: string} = req.body;
+  const { title, content }: { title: string; content: string } = req.body;
 
   jwt.verify(token, jwtSecret, async (err: any, data: any) => {
     if (err) {
@@ -60,7 +66,8 @@ export const postPosts = (req: Request, res: Response) => {
       return res.status(403).json({ msg: 'Forbidden' });
     }
 
-    if(!title || !content) return res.status(200).json({msg: 'missing credentials'});
+    if (!title || !content)
+      return res.status(200).json({ msg: 'missing credentials' });
 
     const post = await prisma.post.create({
       data: {
@@ -74,86 +81,87 @@ export const postPosts = (req: Request, res: Response) => {
       },
     });
 
-    return res.status(201).json({msg: 'created', post: post});
+    return res.status(201).json({ msg: 'created', post: post });
   });
 };
 
-export const updateUniquePost = async (req:Request, res: Response) => {
+export const updateUniquePost = async (req: Request, res: Response) => {
   const postId = parseInt(req.params.id);
-  const title : string | undefined = req.body.title;
-  const msg : string | undefined = req.body.content;
-  const published : boolean = req.body.published;
+  const title: string | undefined = req.body.title;
+  const msg: string | undefined = req.body.content;
+  const published: boolean = req.body.published;
 
-  if(Number.isNaN(postId)) return res.sendStatus(400);
+  if (Number.isNaN(postId)) return res.sendStatus(400);
 
-  const updateData: { title?: string; content?: string; published? : boolean } = {
-    ...(title && { title }), // Conditionally include title
-    ...(msg && { content: msg }), // Conditionally include content
-    published: published ? true : false
-  };
+  const updateData: { title?: string; content?: string; published?: boolean } =
+    {
+      ...(title && { title }), // Conditionally include title
+      ...(msg && { content: msg }), // Conditionally include content
+      published: published ? true : false,
+    };
 
   try {
-
-  const jwtSecret = process.env.JWT_SECRET as string;
-  const token = req.body.token as string;
-
-  jwt.verify(token, jwtSecret, async (err: any, data: any) => {
-    if (err) {
-      console.error(err);
-
-      return res.status(403).json({ msg: 'Invalid token' });
-    }
-
-    const uniquePost = await prisma.post.update({
-      where: {
-        id: postId,
-        authorId: data.id
-      },
-      data: updateData
-    });
-
-    return res.status(200).json({msg: 'updated', post: uniquePost});
-    });
-  }catch(err){
-    return res.status(500).json({err: 'Failed to update post'});
-  }
-}
-
-export const deleteUniquePost = async (req:Request,res:Response) => {
-  const postId = parseInt(req.params.id);
-
-  if(Number.isNaN(postId)) return res.sendStatus(400);
-
-  try{
     const jwtSecret = process.env.JWT_SECRET as string;
     const token = req.body.token as string;
 
-  jwt.verify(token, jwtSecret, async (err: any, data: any) => {
-    if (err) {
-      console.error(err);
+    jwt.verify(token, jwtSecret, async (err: any, data: any) => {
+      if (err) {
+        console.error(err);
 
-      return res.status(403).json({ msg: 'Invalid token' });
-    }
-    
-    if (data.role !== 'ADMIN') {
-      return res.status(403).json({ msg: 'Forbidden' });
-    }
+        return res.status(403).json({ msg: 'Invalid token' });
+      }
 
-    try{
-      const deletedPost = await prisma.post.delete({
+      const uniquePost = await prisma.post.update({
         where: {
           id: postId,
-          authorId: data.id
-        }
-      })
-    
-      return res.status(200).json({msg: 'deleted', post: deletedPost});
-    }catch(e){
-        return res.status(404).json({err: `Post with id ${postId} does not exist`})  
-    }
+          authorId: data.id,
+        },
+        data: updateData,
+      });
 
-  })
-  }catch(e: any){
-      return res.status(500).json({err: 'Failed to delete post', e})
+      return res.status(200).json({ msg: 'updated', post: uniquePost });
+    });
+  } catch (err) {
+    return res.status(500).json({ err: 'Failed to update post' });
   }
-}
+};
+
+export const deleteUniquePost = async (req: Request, res: Response) => {
+  const postId = parseInt(req.params.id);
+
+  if (Number.isNaN(postId)) return res.sendStatus(400);
+
+  try {
+    const jwtSecret = process.env.JWT_SECRET as string;
+    const token = req.body.token as string;
+
+    jwt.verify(token, jwtSecret, async (err: any, data: any) => {
+      if (err) {
+        console.error(err);
+
+        return res.status(403).json({ msg: 'Invalid token' });
+      }
+
+      if (data.role !== 'ADMIN') {
+        return res.status(403).json({ msg: 'Forbidden' });
+      }
+
+      try {
+        const deletedPost = await prisma.post.delete({
+          where: {
+            id: postId,
+            authorId: data.id,
+          },
+        });
+
+        return res.status(200).json({ msg: 'deleted', post: deletedPost });
+      } catch (e) {
+        return res
+          .status(404)
+          .json({ err: `Post with id ${postId} does not exist` });
+      }
+    });
+  } catch (e: any) {
+    return res.status(500).json({ err: 'Failed to delete post', e });
+  }
+};
