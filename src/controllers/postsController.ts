@@ -109,7 +109,7 @@ export const updateUniquePost = async (req: Request, res: Response) => {
     {
       ...(title && { title }), // Conditionally include title
       ...(msg && { content: msg }), // Conditionally include content
-      published: published ? true : false,
+      ...(typeof published === 'boolean' && {published}),
     };
 
   try {
@@ -125,7 +125,7 @@ export const updateUniquePost = async (req: Request, res: Response) => {
 
       const uniquePost = await prisma.post.update({
         where: {
-          id: postId,
+          id: postId, 
           authorId: data.id,
         },
         data: updateData,
